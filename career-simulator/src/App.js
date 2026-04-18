@@ -10,222 +10,307 @@ import {
   Bar
 } from "recharts";
 
+/* ---------------- GALAXY BACKGROUND ---------------- */
+const styleSheet = document.createElement("style");
+styleSheet.innerHTML = `
+body {
+  margin: 0;
+  font-family: Arial;
+  background: radial-gradient(circle at top, #0b1026, #050816);
+  overflow-x: hidden;
+}
+
+@keyframes starsMove {
+  from { transform: translateY(0); }
+  to { transform: translateY(-2000px); }
+}
+
+.stars {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: starsMove 60s linear infinite;
+  box-shadow:
+    20px 40px white,
+    120px 200px white,
+    220px 350px white,
+    320px 500px white,
+    420px 650px white,
+    520px 800px white,
+    620px 950px white,
+    720px 1100px white;
+}
+`;
+document.head.appendChild(styleSheet);
+
 function App() {
+  const [login, setLogin] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [skill, setSkill] = useState("");
   const [level, setLevel] = useState("");
   const [interest, setInterest] = useState("");
+
   const [result, setResult] = useState(null);
 
+  /* ---------------- LOGIN ---------------- */
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (email && password) setLogin(true);
+  };
+
+  /* ---------------- AI SIMULATION ---------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    let base = 50;
+    let score = 50;
 
-    if (skill === "Python") base += 15;
-    if (skill === "AI/ML") base += 25;
-    if (skill === "Data Science") base += 20;
+    const map = {
+      "AI/ML": 20,
+      "Machine Learning": 18,
+      "Data Science": 15,
+      "Python": 12,
+      "Cloud Computing": 10,
+      "Cyber Security": 12,
+      "Web Development": 10,
+      "App Development": 10,
+      "Java": 8,
+      "JavaScript": 8,
+      "DevOps": 10
+    };
 
-    if (level === "Intermediate") base += 10;
-    if (level === "Advanced") base += 20;
+    if (map[skill]) score += map[skill];
 
-    if (interest === "High") base += 10;
-    if (interest === "Low") base -= 10;
+    if (level === "Advanced") score += 15;
+    else if (level === "Intermediate") score += 8;
+    else score += 3;
+
+    if (interest === "High") score += 10;
+    else if (interest === "Medium") score += 5;
+
+    // HARD LIMIT FIX
+    score = Math.min(100, Math.max(0, score));
 
     const data = {
+      score,
+
       salary: [
-        { year: "1", value: base / 10 },
-        { year: "2", value: base / 7 },
-        { year: "3", value: base / 5 },
-        { year: "4", value: base / 3.5 },
-        { year: "5", value: base / 2 }
+        { year: "1", value: score / 10 },
+        { year: "2", value: score / 7 },
+        { year: "3", value: score / 5 },
+        { year: "4", value: score / 3.5 },
+        { year: "5", value: score / 2 }
       ],
 
       jobDemand: [
-        { role: "AI Engineer", value: base + 20 },
-        { role: "Data Scientist", value: base + 10 },
-        { role: "Web Dev", value: base }
+        { role: "AI Engineer", value: score },
+        { role: "Data Scientist", value: score - 5 },
+        { role: "Software Engineer", value: score - 8 },
+        { role: "Cyber Security", value: score - 10 }
       ],
 
-      automationRisk: 100 - base,
+      automationRisk: 100 - score,
 
       comparison: [
-        { role: "AI Engineer", score: base + 25 },
-        { role: "Data Scientist", score: base + 15 },
-        { role: "Web Dev", score: base }
+        { role: "AI Engineer", score },
+        { role: "Data Scientist", score: score - 5 },
+        { role: "Software Engineer", score: score - 8 },
+        { role: "Cyber Security", score: score - 10 }
       ],
 
-      suggestions: [
-        `Improve ${skill || "your skills"}`,
-        "Build real-world projects",
-        "Practice DSA daily",
-        "Learn system design basics"
-      ]
+      suggestions:
+        score > 80
+          ? ["Excellent profile", "Focus on AI projects", "Build real systems"]
+          : score > 60
+          ? ["Good progress", "Improve coding skills", "Build projects"]
+          : ["Start basics", "Practice daily", "Learn fundamentals"]
     };
 
     setResult(data);
   };
 
+  /* ---------------- LOGIN PAGE ---------------- */
+  if (!login) {
+    return (
+      <div style={styles.center}>
+        <div className="stars"></div>
+
+        <form style={styles.card} onSubmit={handleLogin}>
+          <h1 style={styles.title}>🌌 Career Simulator</h1>
+          <p style={styles.subtitle}>AI Career Guidance System</p>
+
+          <input
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <input
+            style={styles.input}
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button style={styles.button}>Login 🚀</button>
+        </form>
+      </div>
+    );
+  }
+
+  /* ---------------- DASHBOARD ---------------- */
   return (
     <div style={styles.page}>
+      <div className="stars"></div>
 
-      <h1 style={styles.title}>Career Decision Simulator 🚀</h1>
+      <h1 style={{ color: "#38bdf8" }}>Career Decision Simulator 🚀</h1>
 
-      {/* INPUT CARD */}
       <form style={styles.card} onSubmit={handleSubmit}>
 
         <select style={styles.input} value={skill} onChange={(e) => setSkill(e.target.value)}>
-          <option value="">Select Skill</option>
-            <option>Python</option>
-  <option>Java</option>
-  <option>JavaScript</option>
-  <option>C++</option>
+          <option>Select Skill</option>
+          <option>Python</option>
+          <option>Java</option>
+          <option>JavaScript</option>
+          <option>AI/ML</option>
+          <option>Machine Learning</option>
+          <option>Data Science</option>
+          <option>Cloud Computing</option>
+          <option>Cyber Security</option>
+          <option>Web Development</option>
+          <option>App Development</option>
+          <option>DevOps</option>
+          <option>Blockchain</option>
+          <option>Android Development</option>
+          <option>Graphic Design</option>
+<option>IoT</option>
+<option>Robotics</option>
+<option>Embedded Systems</option>
+<option>Mathematics</option>
+<option>Statistics</option>
+<option>Physics</option>
 
-          <option>C</option>
-  <option>Go</option>
-  <option>Rust</option>
-  <option>SQL</option>
-  <option>NoSQL</option>
-  <option>HTML/CSS</option>
+<option>Finance</option>
+<option>Accounting</option>
+<option>Cloud Computing</option>
+<option>AWS</option>
+<option>Azure</option>
+<option>Google Cloud</option>
 
-  <option>React</option>
-  <option>Angular</option>
-  <option>Vue</option>
-  <option>Node.js</option>
-  <option>Express.js</option>
+<option>DevOps</option>
+<option>Docker</option>
+<option>Kubernetes</option>
+<option>CI/CD</option>
+<option>Cyber Security</option>
+<option>Ethical Hacking</option>
+<option>Blockchain</option>
+<option>Web3</option>
+<option>Smart Contracts</option>
 
-  <option>Machine Learning</option>
-  <option>Deep Learning</option>
-  <option>Artificial Intelligence</option>
-  <option>Data Science</option>
-  <option>Data Analytics</option>
-
-  <option>Cloud Computing</option>
-  <option>AWS</option>
-  <option>Azure</option>
-  <option>Google Cloud</option>
-  <option>DevOps</option>
-  <option>Docker</option>
-  <option>Kubernetes</option>
-
-  <option>Cyber Security</option>
-  <option>Ethical Hacking</option>
-  <option>Blockchain</option>
-  <option>Web3</option>
-  <option>Cryptography</option>
-
-  <option>UI/UX Design</option>
-  <option>Graphic Design</option>
-  <option>Product Design</option>
-
-  <option>Mobile App Development</option>
-  <option>Android Development</option>
-  <option>iOS Development</option>
-
-  <option>Game Development</option>
-  <option>Unity</option>
-  <option>Unreal Engine</option>
-
-  <option>Business Analytics</option>
-  <option>Finance Tech</option>
-  
         </select>
 
         <select style={styles.input} value={level} onChange={(e) => setLevel(e.target.value)}>
-          <option value="">Select Level</option>
+          <option>Select Level</option>
           <option>Beginner</option>
           <option>Intermediate</option>
           <option>Advanced</option>
         </select>
 
         <select style={styles.input} value={interest} onChange={(e) => setInterest(e.target.value)}>
-          <option value="">Select Interest</option>
+          <option>Select Interest</option>
           <option>Low</option>
           <option>Medium</option>
           <option>High</option>
         </select>
 
-        <button style={styles.button}>Predict Career 🚀</button>
-
+        <button style={styles.button}>Analyze Career</button>
       </form>
 
-      {/* RESULT DASHBOARD */}
+      {/* ---------------- OUTPUT ---------------- */}
       {result && (
-        <div style={styles.resultContainer}>
+        <div style={styles.result}>
 
-          <div style={styles.cardBox}>
-            <h2>📊 Career Score</h2>
-            <h1>{100 - result.automationRisk}/100</h1>
-          </div>
+          <h2>🎯 Career Score</h2>
+          <h1 style={{ color: "#38bdf8" }}>{result.score}/100</h1>
 
-          <div style={styles.cardBox}>
-            <h2>⚠ Automation Risk</h2>
-            <h1>{result.automationRisk}%</h1>
-          </div>
+          {/* SALARY */}
+          <h3>📈 Salary Growth</h3>
+          <LineChart width={500} height={250} data={result.salary}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" />
+            <YAxis />
+            <Tooltip />
+            <Line dataKey="value" stroke="#38bdf8" />
+          </LineChart>
 
-          <div style={styles.chartBox}>
-            <h3>Salary Growth</h3>
-            <LineChart width={500} height={250} data={result.salary}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="value" stroke="#38bdf8" />
-            </LineChart>
-          </div>
+          {/* DEMAND */}
+          <h3>📊 Job Demand</h3>
+          <BarChart width={500} height={250} data={result.jobDemand}>
+            <XAxis dataKey="role" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="value" fill="#22c55e" />
+          </BarChart>
 
-          <div style={styles.chartBox}>
-            <h3>Job Demand</h3>
-            <BarChart width={500} height={250} data={result.jobDemand}>
-              <XAxis dataKey="role" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#22c55e" />
-            </BarChart>
-          </div>
+          {/* RISK */}
+          <h3>⚠ Automation Risk</h3>
+          <p>{result.automationRisk}%</p>
 
-          <div style={styles.cardBox}>
-            <h3>Suggestions</h3>
-            {result.suggestions.map((s, i) => (
-              <p key={i}>✔ {s}</p>
-            ))}
-          </div>
+          {/* COMPARISON */}
+          <h3>🔥 Multi Comparison</h3>
+          {result.comparison.map((c, i) => (
+            <p key={i}>{c.role} → {c.score}</p>
+          ))}
+
+          {/* SUGGESTIONS */}
+          <h3>💡 Suggestions</h3>
+          {result.suggestions.map((s, i) => (
+            <p key={i}>✔ {s}</p>
+          ))}
 
         </div>
       )}
-
     </div>
   );
 }
 
+/* ---------------- STYLES ---------------- */
 const styles = {
-  page: {
-    background: "#0f172a",
-    minHeight: "100vh",
-    color: "white",
-    textAlign: "center",
-    padding: "20px",
-    fontFamily: "Arial"
+  center: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white"
   },
 
-  title: {
-    color: "#38bdf8",
-    marginBottom: "20px"
+  page: {
+    textAlign: "center",
+    minHeight: "100vh",
+    color: "white"
   },
 
   card: {
-    width: "320px",
+    width: "360px",
     margin: "auto",
+    padding: "20px",
+    borderRadius: "16px",
+    background: "rgba(255,255,255,0.05)",
+    backdropFilter: "blur(12px)",
     display: "flex",
     flexDirection: "column",
-    gap: "10px",
-    padding: "20px",
-    background: "#1e293b",
-    borderRadius: "12px"
+    gap: "10px"
   },
 
   input: {
     padding: "10px",
-    borderRadius: "6px",
+    borderRadius: "8px",
     border: "none"
   },
 
@@ -233,30 +318,22 @@ const styles = {
     padding: "10px",
     background: "#38bdf8",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
     fontWeight: "bold"
   },
 
-  resultContainer: {
-    marginTop: "30px",
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "20px"
+  title: {
+    color: "#38bdf8"
   },
 
-  cardBox: {
-    background: "#1e293b",
-    padding: "15px",
-    borderRadius: "10px",
-    width: "250px"
+  subtitle: {
+    color: "#94a3b8",
+    fontSize: "13px"
   },
 
-  chartBox: {
-    background: "#1e293b",
-    padding: "15px",
-    borderRadius: "10px"
+  result: {
+    marginTop: "30px"
   }
 };
 
